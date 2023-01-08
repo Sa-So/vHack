@@ -16,11 +16,11 @@ class Line {
     // if I don't sort , finding which prod to fit in first is diff. !
 
 
-    // vector<int> TypesAllowed; 
+    vector<int> TypesAllowed; 
     // const again.
     // better to use a map
     map<int,int> isAllowed;
-    // now we need count of these.
+    // now we need count of these if using a map
     int nAllowed;
 
 
@@ -28,7 +28,9 @@ class Line {
 
     int capacity; // variable within an year and also after an year.
     // int initialCapacity; // do we need this ?
-    // vector<int> TypesHolding;
+
+
+    vector<int> assigned;
     map<int,int> isAssigned;     // return 0 if not assigned.
     // do we really need to answer to queries like is this line l given prod. type no. x ? / is x on line l ?
 
@@ -43,16 +45,54 @@ class Line {
         }
         isAllowed[p]++;
         nAllowed++;
+        TypesAllowed.push_back(p);
     }
 
     void assign(int p){
+        if(capacity < 1){
+            cout<<"Underflow !"<<endl;
+        }
         isAssigned[p]++;
+        assigned.push_back(p);
         capacity--;
     }
-    // Line(){
-        
-    // }
+
+    void printAllowed(){
+        cout<<lineNo<<": ";
+        cout<<"("<<capacity<<")[";
+        for(auto typ:TypesAllowed){
+            cout<<typ<<", ";
+        }
+        cout<<" ] ";
+        // <<endl; // put endl as per your wish in code.
+    }
+
+    void printAssigned(){
+        cout<<lineNo<<": ";
+        cout<<"("<<capacity<<")[";
+        for(auto al:assigned){
+            cout<<al<<", ";
+        }
+        cout<<" ] ";
+    }
+
+    int getPriority(){
+        // return TypesAllowed.size()-capacity;
+        return nAllowed-capacity;
+    }
 };
+bool compare(Line a, Line b){
+    
+    int pa = a.getPriority();
+    int pb = b.getPriority();
+    if(pa==pb){
+        return a.capacity < b.capacity;
+    }
+    // jiski capacity kum hai usse pehle fill karenge 
+    return pa < pb;
+}
+
+// for pq
 class Compare {
     public:
        bool operator()(Line a, Line b){
@@ -90,45 +130,116 @@ class Compare {
 // we need somethin better.
 // a vector of priority queues ?! what.
 
+void brute_force(){
+
+}
+
 int main(){
     int n,m,k;cin>>n>>m>>k;
     
-    vector<Line> AssemblyLines(m);
+    vector<Line> assemblyLines(m);
     for(int i=0;i<m;i++){
 
-        AssemblyLines[i].lineNo = i+1; // or i ?
+        assemblyLines[i].lineNo = i+1; // or i ?
 
     }
     while(k--){
         int x,y;cin>>x>>y;
-        AssemblyLines[y-1].allow(x);
+        assemblyLines[y-1].allow(x);
     }
 
-    priority_queue<Line, vector<Line>, Compare> Lines;//Lines(m);
+    // for(int i=0)
+
+    // priority_queue<Line, vector<Line>, Compare> Lines;//Lines(m);
 
     for(int i=0;i<m;i++){
-        Lines.push(AssemblyLines[i]);
+    //     // Lines.push(AssemblyLines[i]);
+        cin>>assemblyLines[i].capacity;
     }
+    
+    // debug
+    // for(auto line:assemblyLines){
+    //     line.printAllowed();
+    //     cout<<endl;
+    // }
+    // cout<<endl;
 
-    for(auto line:Lines){
-        
-    }
+    
+
+    // set<int> leftProdsSet;
+    // vector<int> gleftProds;
+
+    // for(int i=0;i<n;i++){
+    //     gleftProds.push_back(i+1);
+    // }
+    vector<bool> gIsProdLeft(n+1,true);
+    
     
     
     int z;cin>>z;
     while(z--){
         
+        int ans = 0; // max ans = n
+        vector<bool> isProdLeft = gIsProdLeft;
+        // vector<int> leftProds = gleftProds;
+
+
+        vector<Line> sortedAssemblyLines = assemblyLines;
+        sort(sortedAssemblyLines.begin(),sortedAssemblyLines.end(),compare);
+
+        for(int i=0;i<m;i++){
+            // sortedAssemblyLines[i].assignAll(leftProds);
+            for(int j=0;j<sortedAssemblyLines[i].TypesAllowed.size();j++){
+                if(sortedAssemblyLines[i].capacity>0 && isProdLeft[sortedAssemblyLines[i].TypesAllowed[j]]){
+                    isProdLeft[sortedAssemblyLines[i].TypesAllowed[j]]=false;
+                    sortedAssemblyLines[i].assign(sortedAssemblyLines[i].TypesAllowed[j]);
+                    ans++;
+                }
+            }
+        }
         
         // calc ans in ~ O(m)
+        
+        // debug 
+        // for(auto line:sortedAssemblyLines){
+        //     line.printAssigned();
+        //     cout<<endl;
+        // }
+
+        cout<<ans<<endl;
          
         
         int r,p;
         cin>>r>>p;
+        assemblyLines[r-1].capacity-=p;
+
+        /*
+        if(assemblyLines[r-1].capacity - p < assemblyLines[r-1].assigned.size()){
+            // remove all ?
+            assemblyLines[r-1].capacity-=p;
+            for(auto p:assemblyLines[r-1].assigned){
+                isProdLeft[p]=true;
+            }
+            assemblyLines[r-1].assigned.clear();
+
+        
+        }else{
+
+            assemblyLines[r-1].capacity-=p;
+        }
+
+        */
+
         // remove node r from pq
 
         // insert node r with capacity of old-p;
 
         // 
+        // cout<<ans;
+
+
+
+        // cout<<endl;
     }
 
 }
