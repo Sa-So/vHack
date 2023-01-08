@@ -154,10 +154,10 @@ int main(){
     }
 
     // debug
-    for(auto line:assemblyLines){
-        line.printAllowed();
-        cout<<endl;
-    }
+//     for(auto line:assemblyLines){
+//         line.printAllowed();
+//         cout<<endl;
+//     }
     // cout<<endl;
 
     
@@ -215,10 +215,10 @@ int main(){
         // calc ans in ~ O(m)
         
         // debug 
-        for(auto line:sortedAssemblyLines){
-            line.printAssigned();
-            cout<<endl;
-        }
+//         for(auto line:sortedAssemblyLines){
+//             line.printAssigned();
+//             cout<<endl;
+//         }
 
 
         cout<<ans<<endl;
