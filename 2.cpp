@@ -4,16 +4,14 @@ using namespace std;
 // class Prod {
 // };
 // nah i'll just use int for products
-// Taking inpu is O(k)
 
 class Line {
     public:
-    int lineNo; // const (why do we need this ? coz we are making a vector of lines and prob. sorting them :/ )
-    
-    
+    int lineNo; 
+    // const (why do we need this ? coz we are making a vector of lines and prob. sorting them :/ )
     // if i sort, then the line from which i want to reuce capacity , finding that line would be O[n]
-
     // if I don't sort , finding which prod to fit in first is diff. !
+    // should I create a mapping of which index has line no. x ?
 
 
     vector<int> TypesAllowed; 
@@ -22,16 +20,12 @@ class Line {
     map<int,int> isAllowed;
     // now we need count of these if using a map
     int nAllowed;
-
-
     // int nDone;
-
     int capacity; // variable within an year and also after an year.
-    // int initialCapacity; // do we need this ?
-
+    int initialCapacity; // do we need this ?
 
     vector<int> assigned;
-    map<int,int> isAssigned;     // return 0 if not assigned.
+    map<int,int> isAssigned;     // return 0 if not assigned.?
     // do we really need to answer to queries like is this line l given prod. type no. x ? / is x on line l ?
 
     bool isProdAllowed(int p){
@@ -74,6 +68,11 @@ class Line {
             cout<<al<<", ";
         }
         cout<<" ] ";
+    }
+
+    void refresh(){
+        assigned.clear();
+        capacity=initialCapacity;
     }
 
     int getPriority(){
@@ -130,10 +129,6 @@ class Compare {
 // we need somethin better.
 // a vector of priority queues ?! what.
 
-void brute_force(){
-
-}
-
 int main(){
     int n,m,k;cin>>n>>m>>k;
     
@@ -155,13 +150,14 @@ int main(){
     for(int i=0;i<m;i++){
     //     // Lines.push(AssemblyLines[i]);
         cin>>assemblyLines[i].capacity;
+        assemblyLines[i].initialCapacity = assemblyLines[i].capacity;
     }
-    
+
     // debug
-    // for(auto line:assemblyLines){
-    //     line.printAllowed();
-    //     cout<<endl;
-    // }
+//     for(auto line:assemblyLines){
+//         line.printAllowed();
+//         cout<<endl;
+//     }
     // cout<<endl;
 
     
@@ -176,23 +172,41 @@ int main(){
     
     
     
+    vector<Line> sortedAssemblyLines = assemblyLines;
+    sort(sortedAssemblyLines.begin(),sortedAssemblyLines.end(),compare);
+    
     int z;cin>>z;
+    // int Z;
+    int r=-1,p=0;
     while(z--){
         
         int ans = 0; // max ans = n
         vector<bool> isProdLeft = gIsProdLeft;
         // vector<int> leftProds = gleftProds;
 
-
-        vector<Line> sortedAssemblyLines = assemblyLines;
-        sort(sortedAssemblyLines.begin(),sortedAssemblyLines.end(),compare);
-
+        bool flag = false; // are we swapping ?
         for(int i=0;i<m;i++){
+            sortedAssemblyLines[i].refresh();
+
+            if(sortedAssemblyLines[i].lineNo == r){// no need of r-1 here.
+                sortedAssemblyLines[i].capacity-=p;
+                sortedAssemblyLines[i].initialCapacity-=p;
+                flag = true;
+            }
+
+            if(flag && i+1<n){
+                if(compare(sortedAssemblyLines[i],sortedAssemblyLines[i+1])){
+                    flag=false;
+                }else{
+                    swap(sortedAssemblyLines[i],sortedAssemblyLines[i+1]);
+                }
+            }
+
             // sortedAssemblyLines[i].assignAll(leftProds);
             for(int j=0;j<sortedAssemblyLines[i].TypesAllowed.size();j++){
                 if(sortedAssemblyLines[i].capacity>0 && isProdLeft[sortedAssemblyLines[i].TypesAllowed[j]]){
                     isProdLeft[sortedAssemblyLines[i].TypesAllowed[j]]=false;
-                    sortedAssemblyLines[i].assign(sortedAssemblyLines[i].TypesAllowed[j]);
+                    sortedAssemblyLines[i].assign(sortedAssemblyLines[i].TypesAllowed[j]); // cap-- happens inside here
                     ans++;
                 }
             }
@@ -201,17 +215,18 @@ int main(){
         // calc ans in ~ O(m)
         
         // debug 
-        // for(auto line:sortedAssemblyLines){
-        //     line.printAssigned();
-        //     cout<<endl;
-        // }
+//         for(auto line:sortedAssemblyLines){
+//             line.printAssigned();
+//             cout<<endl;
+//         }
+
 
         cout<<ans<<endl;
+        // int r,p;
+        cin>>r>>p;
          
         
-        int r,p;
-        cin>>r>>p;
-        assemblyLines[r-1].capacity-=p;
+        // assemblyLines[r-1].capacity-=p;
 
         /*
         if(assemblyLines[r-1].capacity - p < assemblyLines[r-1].assigned.size()){
@@ -221,13 +236,10 @@ int main(){
                 isProdLeft[p]=true;
             }
             assemblyLines[r-1].assigned.clear();
-
         
         }else{
-
             assemblyLines[r-1].capacity-=p;
         }
-
         */
 
         // remove node r from pq
@@ -243,3 +255,12 @@ int main(){
     }
 
 }
+// Update / What addition did I do ?
+// We can optimize the sorting to just swaping.
+// as only 1 line has changed it's capacity we keep swapping it with the next line
+// until priority (n-cap.) doesn't become < than it's right one !
+
+
+// but complexity redN = z * n * log (n) to z* n
+// and since n is only uptil  2000 i don't think it really matters much
+// and it will also require clearing assigned prods every time 
