@@ -199,6 +199,7 @@ int main(){
                     flag=false;
                 }else{
                     swap(sortedAssemblyLines[i],sortedAssemblyLines[i+1]);
+                    sortedAssemblyLines[i].refresh();
                 }
             }
 
